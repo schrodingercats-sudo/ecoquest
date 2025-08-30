@@ -1,0 +1,177 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+/* Tailwind CSS directives - Ignore CSS validation errors for these lines */
+/* stylelint-disable at-rule-no-unknown */
+/* csslint ignore:start */
+/* Unknown at rule @tailwind css(unknownAtRules) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* stylelint-enable at-rule-no-unknown */
+/* csslint ignore:end */
+
+/* Mobile-first responsive improvements */
+@layer utilities {
+  .text-responsive {
+    @apply text-sm sm:text-base md:text-lg;
+  }
+  
+  .heading-responsive {
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl;
+  }
+  
+  .padding-responsive {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+  
+  .margin-responsive {
+    @apply m-4 sm:m-6 lg:m-8;
+  }
+  
+  .gap-responsive {
+    @apply gap-3 sm:gap-4 md:gap-6;
+  }
+}
+
+/* Touch-friendly interactive elements */
+@layer base {
+  @media (hover: none) {
+    .hover\:scale-105:hover {
+      transform: scale(1.02);
+    }
+  }
+}
+
+/* Improve text readability on small screens */
+@layer base {
+  @media (max-width: 640px) {
+    body {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  }
+}
+
+:root {
+  --background: hsl(210, 20%, 98%);
+  --foreground: hsl(215, 25%, 27%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(215, 25%, 27%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(215, 25%, 27%);
+  --primary: hsl(158, 64%, 52%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(199, 89%, 48%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(215, 27%, 92%);
+  --muted-foreground: hsl(215, 25%, 27%);
+  --accent: hsl(43, 96%, 56%);
+  --accent-foreground: hsl(25, 95%, 15%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(215, 27%, 92%);
+  --input: hsl(215, 27%, 92%);
+  --ring: hsl(158, 64%, 52%);
+  --chart-1: hsl(158, 64%, 52%);
+  --chart-2: hsl(199, 89%, 48%);
+  --chart-3: hsl(43, 96%, 56%);
+  --chart-4: hsl(147, 78%, 42%);
+  --chart-5: hsl(341, 75%, 51%);
+  --sidebar: hsl(180, 7%, 97%);
+  --sidebar-foreground: hsl(215, 25%, 27%);
+  --sidebar-primary: hsl(158, 64%, 52%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(212, 51%, 93%);
+  --sidebar-accent-foreground: hsl(158, 64%, 52%);
+  --sidebar-border: hsl(205, 25%, 91%);
+  --sidebar-ring: hsl(158, 64%, 52%);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.75rem;
+  --shadow-2xs: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 1px 2px -1px hsl(158, 64%, 52% / 0.00);
+  --shadow: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 1px 2px -1px hsl(158, 64%, 52% / 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 2px 4px -1px hsl(158, 64%, 52% / 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 4px 6px -1px hsl(158, 64%, 52% / 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00), 0px 8px 10px -1px hsl(158, 64%, 52% / 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(158, 64%, 52% / 0.00);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+}
+
+.dark {
+  --background: hsl(0, 0%, 0%);
+  --foreground: hsl(200, 7%, 91%);
+  --card: hsl(228, 10%, 10%);
+  --card-foreground: hsl(0, 0%, 85%);
+  --popover: hsl(0, 0%, 0%);
+  --popover-foreground: hsl(200, 7%, 91%);
+  --primary: hsl(158, 64%, 52%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(199, 89%, 48%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(0, 0%, 9%);
+  --muted-foreground: hsl(210, 3%, 46%);
+  --accent: hsl(43, 96%, 56%);
+  --accent-foreground: hsl(25, 95%, 15%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 5%, 15%);
+  --input: hsl(208, 28%, 18%);
+  --ring: hsl(158, 64%, 52%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    background: linear-gradient(135deg, hsl(210, 20%, 98%) 0%, hsl(158, 64%, 95%) 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .hero-pattern {
+    background-image: 
+      radial-gradient(circle at 20% 80%, hsl(158, 64%, 52% / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(199, 89%, 48% / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, hsl(43, 96%, 56% / 0.05) 0%, transparent 50%);
+  }
+
+  .game-card {
+    background: linear-gradient(145deg, hsl(0, 0%, 100%) 0%, hsl(0, 0%, 98%) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(215, 27%, 92%);
+  }
+
+  .badge-glow {
+    box-shadow: 0 0 20px hsl(43, 96%, 56% / 0.3);
+  }
+
+  .eco-gradient {
+    background: linear-gradient(135deg, hsl(158, 64%, 52%) 0%, hsl(199, 89%, 48%) 100%);
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounce 2s infinite;
+}

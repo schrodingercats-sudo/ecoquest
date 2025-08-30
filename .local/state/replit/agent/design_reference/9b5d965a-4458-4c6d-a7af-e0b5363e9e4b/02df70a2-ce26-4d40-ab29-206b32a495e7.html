@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoQuest - Gamified Environmental Education</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    borderRadius: {
+                        lg: "var(--radius)",
+                        md: "calc(var(--radius) - 2px)",
+                        sm: "calc(var(--radius) - 4px)",
+                    },
+                    colors: {
+                        background: "var(--background)",
+                        foreground: "var(--foreground)",
+                        card: {
+                            DEFAULT: "var(--card)",
+                            foreground: "var(--card-foreground)",
+                        },
+                        popover: {
+                            DEFAULT: "var(--popover)",
+                            foreground: "var(--popover-foreground)",
+                        },
+                        primary: {
+                            DEFAULT: "var(--primary)",
+                            foreground: "var(--primary-foreground)",
+                        },
+                        secondary: {
+                            DEFAULT: "var(--secondary)",
+                            foreground: "var(--secondary-foreground)",
+                        },
+                        muted: {
+                            DEFAULT: "var(--muted)",
+                            foreground: "var(--muted-foreground)",
+                        },
+                        accent: {
+                            DEFAULT: "var(--accent)",
+                            foreground: "var(--accent-foreground)",
+                        },
+                        destructive: {
+                            DEFAULT: "var(--destructive)",
+                            foreground: "var(--destructive-foreground)",
+                        },
+                        border: "var(--border)",
+                        input: "var(--input)",
+                        ring: "var(--ring)",
+                    },
+                    fontFamily: {
+                        sans: ["var(--font-sans)"],
+                        serif: ["var(--font-serif)"],
+                        mono: ["var(--font-mono)"],
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-subtle': 'bounce 2s infinite',
+                    }
+                },
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --background: hsl(210 20% 98%);
+            --foreground: hsl(215 25% 27%);
+            --card: hsl(0 0% 100%);
+            --card-foreground: hsl(215 25% 27%);
+            --popover: hsl(0 0% 100%);
+            --popover-foreground: hsl(215 25% 27%);
+            --primary: hsl(158 64% 52%);
+            --primary-foreground: hsl(0 0% 100%);
+            --secondary: hsl(199 89% 48%);
+            --secondary-foreground: hsl(0 0% 100%);
+            --muted: hsl(215 27% 92%);
+            --muted-foreground: hsl(215 25% 27%);
+            --accent: hsl(43 96% 56%);
+            --accent-foreground: hsl(25 95% 15%);
+            --destructive: hsl(0 84% 60%);
+            --destructive-foreground: hsl(0 0% 100%);
+            --border: hsl(215 27% 92%);
+            --input: hsl(215 27% 92%);
+            --ring: hsl(158 64% 52%);
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --radius: 0.75rem;
+        }
+        
+        body {
+            font-family: var(--font-sans);
+            background: linear-gradient(135deg, hsl(210 20% 98%) 0%, hsl(158 64% 95%) 100%);
+            min-height: 100vh;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .hero-pattern {
+            background-image: 
+                radial-gradient(circle at 20% 80%, hsl(158 64% 52% / 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, hsl(199 89% 48% / 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, hsl(43 96% 56% / 0.05) 0%, transparent 50%);
+        }
+        
+        .game-card {
+            background: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(0 0% 98%) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid hsl(215 27% 92%);
+        }
+        
+        .badge-glow {
+            box-shadow: 0 0 20px hsl(43 96% 56% / 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring circle {
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+        
+        .eco-gradient {
+            background: linear-gradient(135deg, hsl(158 64% 52%) 0%, hsl(199 89% 48%) 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- @COMPONENT: NavigationHeader -->
+    <header class="bg-background/80 backdrop-blur-sm border-b border-border sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-leaf text-primary-foreground text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                            EcoQuest
+                        </h1>
+                        <p class="text-xs text-muted-foreground">Planet Heroes Unite!</p>
+                    </div>
+                </div>
+                
+                <nav class="hidden md:flex items-center space-x-6">
+                    <button data-tab="home" class="tab-btn text-sm font-medium text-foreground hover:text-primary transition-colors">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </button>
+                    <button data-tab="student" class="tab-btn text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                        <i class="fas fa-gamepad mr-2"></i>Student Portal
+                    </button>
+                    <button data-tab="teacher" class="tab-btn text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                        <i class="fas fa-chart-line mr-2"></i>Teacher Dashboard
+                    </button>
+                    <button data-tab="leaderboard" class="tab-btn text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                        <i class="fas fa-trophy mr-2"></i>Leaderboard
+                    </button>
+                </nav>
+                
+                <div class="flex items-center space-x-3">
+                    <button class="bg-muted hover:bg-muted/80 text-muted-foreground px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-user mr-2"></i>Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: NavigationHeader -->
+
+    <!-- @COMPONENT: HomePage [Landing page with hero section] -->
+    <div id="home" class="tab-content active">
+        <section class="hero-pattern min-h-screen flex items-center justify-center relative overflow-hidden">
+            <!-- Floating decorative elements -->
+            <div class="absolute top-20 left-10 w-20 h-20 bg-primary/10 rounded-full animate-float"></div>
+            <div class="absolute top-40 right-20 w-16 h-16 bg-secondary/10 rounded-full animate-float" style="animation-delay: 1s;"></div>
+            <div class="absolute bottom-40 left-1/4 w-12 h-12 bg-accent/10 rounded-full animate-float" style="animation-delay: 2s;"></div>
+            
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div class="mb-8">
+                    <h2 class="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent mb-4 animate-pulse-slow">
+                        Save the Planet
+                    </h2>
+                    <p class="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
+                        Join thousands of Planet Heroes learning sustainability through epic mini-games, earning badges, and making a real difference! 🌍
+                    </p>
+                    
+                    <!-- Hero Action Cards -->
+                    <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                        <!-- Student Portal Card -->
+                        <div class="game-card p-8 rounded-2xl group hover:scale-105 transition-all duration-300 cursor-pointer" data-tab-target="student">
+                            <div class="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:rotate-6 transition-transform">
+                                <i class="fas fa-gamepad text-3xl text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-foreground mb-3">🎮 Play as Student</h3>
+                            <p class="text-muted-foreground mb-6">
+                                Embark on eco-adventures, collect badges, compete with friends, and become a Planet Hero!
+                            </p>
+                            <div class="flex items-center justify-center space-x-4 text-sm text-muted-foreground">
+                                <span><i class="fas fa-trophy text-accent mr-1"></i>Earn Badges</span>
+                                <span><i class="fas fa-star text-accent mr-1"></i>Gain Points</span>
+                                <span><i class="fas fa-users text-accent mr-1"></i>Compete</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Teacher Portal Card -->
+                        <div class="game-card p-8 rounded-2xl group hover:scale-105 transition-all duration-300 cursor-pointer" data-tab-target="teacher">
+                            <div class="w-20 h-20 bg-gradient-to-br from-secondary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:rotate-6 transition-transform">
+                                <i class="fas fa-chart-line text-3xl text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-foreground mb-3">📊 Teacher Dashboard</h3>
+                            <p class="text-muted-foreground mb-6">
+                                Track student progress, view analytics, manage classrooms, and export performance data.
+                            </p>
+                            <div class="flex items-center justify-center space-x-4 text-sm text-muted-foreground">
+                                <span><i class="fas fa-analytics text-accent mr-1"></i>Analytics</span>
+                                <span><i class="fas fa-download text-accent mr-1"></i>Export Data</span>
+                                <span><i class="fas fa-users-cog text-accent mr-1"></i>Manage</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-3 gap-4 max-w-2xl mx-auto mt-16">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-primary">10K+</div>
+                        <div class="text-sm text-muted-foreground">Planet Heroes</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-secondary">50+</div>
+                        <div class="text-sm text-muted-foreground">Eco Challenges</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-accent">100+</div>
+                        <div class="text-sm text-muted-foreground">Badges Earned</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- @END_COMPONENT: HomePage -->
+
+    <!-- @COMPONENT: StudentPortal [Student dashboard with games] -->
+    <div id="student" class="tab-content">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Student Profile Header -->
+            <div class="bg-card rounded-2xl p-6 mb-8 border border-border">
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
+                            <span class="text-2xl font-bold text-white" data-mock="true">AK</span>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-foreground" data-bind="user.name">Alex Knight</h2>
+                            <p class="text-muted-foreground">Planet Hero Level 7</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-6 mt-4 md:mt-0">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-primary" data-bind="user.totalPoints">2,450</div>
+                            <div class="text-sm text-muted-foreground">Total Points</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-accent" data-bind="user.badges.length">12</div>
+                            <div class="text-sm text-muted-foreground">Badges</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-secondary" data-bind="user.rank">3rd</div>
+                            <div class="text-sm text-muted-foreground">Global Rank</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Earned Badges Section -->
+            <div class="bg-card rounded-2xl p-6 mb-8 border border-border">
+                <h3 class="text-xl font-bold text-foreground mb-4">🏆 Your Planet Hero Badges</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <!-- @MAP: userBadges.map(badge => ( -->
+                    <div class="badge-glow bg-gradient-to-br from-accent to-yellow-400 p-4 rounded-xl text-center group hover:scale-110 transition-all duration-300" data-mock="true">
+                        <i class="fas fa-recycle text-2xl text-white mb-2"></i>
+                        <p class="text-xs font-semibold text-white">Waste Warrior</p>
+                    </div>
+                    <div class="badge-glow bg-gradient-to-br from-blue-400 to-secondary p-4 rounded-xl text-center group hover:scale-110 transition-all duration-300" data-mock="true">
+                        <i class="fas fa-tint text-2xl text-white mb-2"></i>
+                        <p class="text-xs font-semibold text-white">Water Saver</p>
+                    </div>
+                    <div class="badge-glow bg-gradient-to-br from-green-400 to-primary p-4 rounded-xl text-center group hover:scale-110 transition-all duration-300" data-mock="true">
+                        <i class="fas fa-seedling text-2xl text-white mb-2"></i>
+                        <p class="text-xs font-semibold text-white">Green Thumb</p>
+                    </div>
+                    <div class="bg-muted/30 border-2 border-dashed border-muted-foreground/30 p-4 rounded-xl text-center opacity-60" data-mock="true">
+                        <i class="fas fa-lock text-2xl text-muted-foreground mb-2"></i>
+                        <p class="text-xs text-muted-foreground">Coming Soon</p>
+                    </div>
+                    <div class="bg-muted/30 border-2 border-dashed border-muted-foreground/30 p-4 rounded-xl text-center opacity-60" data-mock="true">
+                        <i class="fas fa-lock text-2xl text-muted-foreground mb-2"></i>
+                        <p class="text-xs text-muted-foreground">Coming Soon</p>
+                    </div>
+                    <div class="bg-muted/30 border-2 border-dashed border-muted-foreground/30 p-4 rounded-xl text-center opacity-60" data-mock="true">
+                        <i class="fas fa-lock text-2xl text-muted-foreground mb-2"></i>
+                        <p class="text-xs text-muted-foreground">Coming Soon</p>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+            
+            <!-- Mini-Games Section -->
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-foreground mb-6">🎮 Planet Hero Challenges</h3>
+                <div class="grid lg:grid-cols-3 gap-6">
+                    
+                    <!-- Game 1: Waste Sorting -->
+                    <div class="game-card rounded-2xl overflow-hidden group hover:scale-105 transition-all duration-300">
+                        <!-- Game Canvas Placeholder -->
+                        <!-- @FUNCTIONALITY: This should implement Phaser.js drag-drop waste sorting game -->
+                        <div class="h-64 bg-gradient-to-br from-green-100 to-green-200 relative overflow-hidden">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <canvas id="waste-sorting-canvas" class="w-full h-full" data-implementation="Phaser.js waste sorting game"></canvas>
+                                <!-- Fallback preview -->
+                                <div class="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-recycle text-6xl text-green-600 mb-4 animate-bounce-subtle"></i>
+                                        <p class="text-green-800 font-semibold">Waste Sorting Challenge</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold text-foreground mb-2">♻️ Waste Sorting Hero</h4>
+                            <p class="text-muted-foreground text-sm mb-4">Drag and drop items into the correct recycling bins. Master waste segregation and save the planet!</p>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-sm font-medium text-muted-foreground">Best Score: <span class="text-primary font-bold" data-bind="games.wasteSorting.bestScore">450</span></span>
+                                <span class="text-sm font-medium text-muted-foreground">Plays: <span class="text-secondary font-bold" data-bind="games.wasteSorting.playCount">12</span></span>
+                            </div>
+                            <button class="w-full bg-gradient-to-r from-primary to-green-600 hover:from-primary/90 hover:to-green-600/90 text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-all duration-300 group-hover:shadow-lg" data-event="click:startWasteSortingGame">
+                                <i class="fas fa-play mr-2"></i>Start Challenge
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Game 2: Water Saver -->
+                    <div class="game-card rounded-2xl overflow-hidden group hover:scale-105 transition-all duration-300">
+                        <!-- @FUNCTIONALITY: This should implement Phaser.js water saver clicking game -->
+                        <div class="h-64 bg-gradient-to-br from-blue-100 to-blue-200 relative overflow-hidden">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <canvas id="water-saver-canvas" class="w-full h-full" data-implementation="Phaser.js water saving click game"></canvas>
+                                <!-- Fallback preview -->
+                                <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-sky-100 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-tint text-6xl text-blue-600 mb-4 animate-bounce-subtle"></i>
+                                        <p class="text-blue-800 font-semibold">Water Saver Challenge</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold text-foreground mb-2">💧 Water Saver Hero</h4>
+                            <p class="text-muted-foreground text-sm mb-4">Click to stop dripping taps before the bucket overflows! Every drop saved counts toward saving our planet.</p>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-sm font-medium text-muted-foreground">Best Score: <span class="text-primary font-bold" data-bind="games.waterSaver.bestScore">320</span></span>
+                                <span class="text-sm font-medium text-muted-foreground">Plays: <span class="text-secondary font-bold" data-bind="games.waterSaver.playCount">8</span></span>
+                            </div>
+                            <button class="w-full bg-gradient-to-r from-secondary to-blue-600 hover:from-secondary/90 hover:to-blue-600/90 text-secondary-foreground font-semibold py-3 px-6 rounded-xl transition-all duration-300 group-hover:shadow-lg" data-event="click:startWaterSaverGame">
+                                <i class="fas fa-play mr-2"></i>Start Challenge
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Game 3: Plant Tree -->
+                    <div class="game-card rounded-2xl overflow-hidden group hover:scale-105 transition-all duration-300">
+                        <!-- @FUNCTIONALITY: This should implement Phaser.js tree growing simulation -->
+                        <div class="h-64 bg-gradient-to-br from-amber-100 to-green-200 relative overflow-hidden">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <canvas id="plant-tree-canvas" class="w-full h-full" data-implementation="Phaser.js tree planting growth game"></canvas>
+                                <!-- Fallback preview -->
+                                <div class="absolute inset-0 bg-gradient-to-br from-amber-50 to-green-100 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-seedling text-6xl text-green-600 mb-4 animate-bounce-subtle"></i>
+                                        <p class="text-green-800 font-semibold">Tree Planting Challenge</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold text-foreground mb-2">🌱 Tree Planting Hero</h4>
+                            <p class="text-muted-foreground text-sm mb-4">Click to water your tree and watch it grow through 3 stages. Nurture life and become a Green Thumb hero!</p>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-sm font-medium text-muted-foreground">Trees Grown: <span class="text-primary font-bold" data-bind="games.plantTree.treesGrown">5</span></span>
+                                <span class="text-sm font-medium text-muted-foreground">Plays: <span class="text-secondary font-bold" data-bind="games.plantTree.playCount">15</span></span>
+                            </div>
+                            <button class="w-full bg-gradient-to-r from-accent to-green-600 hover:from-accent/90 hover:to-green-600/90 text-accent-foreground font-semibold py-3 px-6 rounded-xl transition-all duration-300 group-hover:shadow-lg" data-event="click:startPlantTreeGame">
+                                <i class="fas fa-play mr-2"></i>Start Challenge
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Eco-Facts Section -->
+            <div class="bg-card rounded-2xl p-6 border border-border">
+                <h3 class="text-xl font-bold text-foreground mb-4">🌍 Did You Know?</h3>
+                <!-- @STATE: currentFactIndex:number = 0 -->
+                <div class="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-6 text-center" data-mock="true">
+                    <i class="fas fa-lightbulb text-3xl text-accent mb-4"></i>
+                    <p class="text-lg font-medium text-foreground mb-2" data-bind="ecoFacts[currentFactIndex].title">Every minute, one million plastic bottles are purchased worldwide!</p>
+                    <p class="text-muted-foreground text-sm" data-bind="ecoFacts[currentFactIndex].description">By reducing single-use plastics, you can help save marine life and reduce ocean pollution.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: StudentPortal -->
+
+    <!-- @COMPONENT: TeacherDashboard [Teacher analytics and management] -->
+    <div id="teacher" class="tab-content">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Teacher Header -->
+            <div class="bg-card rounded-2xl p-6 mb-8 border border-border">
+                <div class="flex flex-col md:flex-row items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-secondary to-accent rounded-full flex items-center justify-center">
+                            <i class="fas fa-chalkboard-teacher text-2xl text-white"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-foreground" data-bind="teacher.name">Ms. Sarah Johnson</h2>
+                            <p class="text-muted-foreground">Environmental Science Teacher</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4 mt-4 md:mt-0">
+                        <button class="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors" data-event="click:exportClassData">
+                            <i class="fas fa-download mr-2"></i>Export CSV
+                        </button>
+                        <button class="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-6 py-3 rounded-lg font-semibold transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Add Student
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analytics Overview Cards -->
+            <div class="grid lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-card rounded-xl p-6 border border-border">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-muted-foreground text-sm font-medium">Total Students</p>
+                            <p class="text-3xl font-bold text-foreground" data-bind="class.totalStudents">28</p>
+                        </div>
+                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-users text-primary text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-card rounded-xl p-6 border border-border">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-muted-foreground text-sm font-medium">Average Score</p>
+                            <p class="text-3xl font-bold text-foreground" data-bind="class.averageScore">1,847</p>
+                        </div>
+                        <div class="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-secondary text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-card rounded-xl p-6 border border-border">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-muted-foreground text-sm font-medium">Badges Earned</p>
+                            <p class="text-3xl font-bold text-foreground" data-bind="class.totalBadges">156</p>
+                        </div>
+                        <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-medal text-accent text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-card rounded-xl p-6 border border-border">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-muted-foreground text-sm font-medium">Active Today</p>
+                            <p class="text-3xl font-bold text-foreground" data-bind="class.activeToday">22</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-user-check text-green-500 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analytics Charts -->
+            <div class="grid lg:grid-cols-2 gap-6 mb-8">
+                <!-- Student Progress Chart -->
+                <div class="bg-card rounded-2xl p-6 border border-border">
+                    <h3 class="text-xl font-bold text-foreground mb-4">📈 Student Progress Over Time</h3>
+                    <!-- @FUNCTIONALITY: Recharts line chart showing student progress -->
+                    <div class="h-64 bg-muted/30 rounded-lg flex items-center justify-center" data-implementation="Recharts LineChart component">
+                        <div class="text-center text-muted-foreground">
+                            <i class="fas fa-chart-line text-4xl mb-2"></i>
+                            <p>Progress Analytics Chart</p>
+                            <p class="text-xs">Recharts Integration</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Game Performance Chart -->
+                <div class="bg-card rounded-2xl p-6 border border-border">
+                    <h3 class="text-xl font-bold text-foreground mb-4">🎮 Game Performance</h3>
+                    <!-- @FUNCTIONALITY: Recharts bar chart showing game completion rates -->
+                    <div class="h-64 bg-muted/30 rounded-lg flex items-center justify-center" data-implementation="Recharts BarChart component">
+                        <div class="text-center text-muted-foreground">
+                            <i class="fas fa-chart-bar text-4xl mb-2"></i>
+                            <p>Game Analytics Chart</p>
+                            <p class="text-xs">Recharts Integration</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Class Leaderboard -->
+            <div class="bg-card rounded-2xl p-6 border border-border">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-foreground">🏆 Top Planet Heroes</h3>
+                    <button class="text-primary hover:text-primary/80 font-medium text-sm">
+                        View Full Leaderboard <i class="fas fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- @MAP: topStudents.map((student, index) => ( -->
+                    <div class="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors" data-mock="true">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-8 h-8 bg-gradient-to-br from-accent to-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                1
+                            </div>
+                            <div class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold">
+                                AK
+                            </div>
+                            <div>
+                                <p class="font-semibold text-foreground">Alex Knight</p>
+                                <p class="text-sm text-muted-foreground">12 badges earned</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-foreground text-lg">2,450</p>
+                            <p class="text-sm text-muted-foreground">points</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors" data-mock="true">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                2
+                            </div>
+                            <div class="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                                EM
+                            </div>
+                            <div>
+                                <p class="font-semibold text-foreground">Emma Martinez</p>
+                                <p class="text-sm text-muted-foreground">10 badges earned</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-foreground text-lg">2,180</p>
+                            <p class="text-sm text-muted-foreground">points</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors" data-mock="true">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-8 h-8 bg-gradient-to-br from-amber-600 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                3
+                            </div>
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold">
+                                LG
+                            </div>
+                            <div>
+                                <p class="font-semibold text-foreground">Liam Garcia</p>
+                                <p class="text-sm text-muted-foreground">9 badges earned</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-foreground text-lg">1,950</p>
+                            <p class="text-sm text-muted-foreground">points</p>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: TeacherDashboard -->
+
+    <!-- @COMPONENT: Leaderboard [Global leaderboard with real-time updates] -->
+    <div id="leaderboard" class="tab-content">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Leaderboard Header -->
+            <div class="text-center mb-8">
+                <h2 class="text-4xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent mb-4">
+                    🏆 Planet Heroes Leaderboard
+                </h2>
+                <p class="text-muted-foreground text-lg">Top environmental champions from around the world!</p>
+            </div>
+            
+            <!-- Podium Section -->
+            <div class="flex justify-center items-end space-x-4 mb-8">
+                <!-- 2nd Place -->
+                <div class="text-center">
+                    <div class="w-24 h-32 bg-gradient-to-br from-gray-200 to-gray-400 rounded-t-xl flex items-end justify-center pb-4" data-mock="true">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 mx-auto">
+                                EM
+                            </div>
+                            <div class="text-white font-bold text-sm">Emma M.</div>
+                            <div class="text-white/80 text-xs">2,180 pts</div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-300 text-gray-700 py-2 px-4 rounded-b-xl font-bold">2nd</div>
+                </div>
+                
+                <!-- 1st Place -->
+                <div class="text-center">
+                    <div class="w-24 h-40 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-t-xl flex items-end justify-center pb-4" data-mock="true">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 mx-auto">
+                                AK
+                            </div>
+                            <div class="text-white font-bold text-sm">Alex K.</div>
+                            <div class="text-white/80 text-xs">2,450 pts</div>
+                        </div>
+                    </div>
+                    <div class="bg-yellow-400 text-yellow-900 py-2 px-4 rounded-b-xl font-bold">1st 👑</div>
+                </div>
+                
+                <!-- 3rd Place -->
+                <div class="text-center">
+                    <div class="w-24 h-28 bg-gradient-to-br from-amber-600 to-orange-500 rounded-t-xl flex items-end justify-center pb-4" data-mock="true">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-xl mb-2 mx-auto">
+                                LG
+                            </div>
+                            <div class="text-white font-bold text-sm">Liam G.</div>
+                            <div class="text-white/80 text-xs">1,950 pts</div>
+                        </div>
+                    </div>
+                    <div class="bg-orange-400 text-orange-900 py-2 px-4 rounded-b-xl font-bold">3rd</div>
+                </div>
+            </div>
+            
+            <!-- Full Leaderboard -->
+            <div class="bg-card rounded-2xl border border-border overflow-hidden">
+                <div class="bg-gradient-to-r from-primary to-secondary p-6">
+                    <h3 class="text-xl font-bold text-primary-foreground mb-2">Global Rankings</h3>
+                    <p class="text-primary-foreground/80">Real-time updates from Planet Heroes worldwide</p>
+                </div>
+                
+                <div class="divide-y divide-border">
+                    <!-- @MAP: leaderboardEntries.map((entry, index) => ( -->
+                    <div class="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors" data-mock="true">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-muted-foreground font-bold text-sm">
+                                4
+                            </div>
+                            <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold">
+                                SL
+                            </div>
+                            <div>
+                                <p class="font-semibold text-foreground">Sofia Lopez</p>
+                                <div class="flex items-center space-x-3 mt-1">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-accent/10 text-accent-foreground">
+                                        <i class="fas fa-medal w-3 h-3 mr-1"></i>8 badges
+                                    </span>
+                                    <span class="text-xs text-muted-foreground">Level 6</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-foreground text-lg">1,780</p>
+                            <p class="text-sm text-green-600">+45 today</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors" data-mock="true">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-muted-foreground font-bold text-sm">
+                                5
+                            </div>
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                                MR
+                            </div>
+                            <div>
+                                <p class="font-semibold text-foreground">Marcus Rodriguez</p>
+                                <div class="flex items-center space-x-3 mt-1">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-accent/10 text-accent-foreground">
+                                        <i class="fas fa-medal w-3 h-3 mr-1"></i>7 badges
+                                    </span>
+                                    <span class="text-xs text-muted-foreground">Level 5</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-foreground text-lg">1,650</p>
+                            <p class="text-sm text-green-600">+120 today</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-6 hover:bg-muted/30 transition-colors" data-mock="true">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-muted-foreground font-bold text-sm">
+                                6
+                            </div>
+                            <div class="w-12 h-12 bg-gradient-to-br from-red-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                                JW
+                            </div>
+                            <div>
+                                <p class="font-semibold text-foreground">Jessica Wang</p>
+                                <div class="flex items-center space-x-3 mt-1">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-accent/10 text-accent-foreground">
+                                        <i class="fas fa-medal w-3 h-3 mr-1"></i>6 badges
+                                    </span>
+                                    <span class="text-xs text-muted-foreground">Level 4</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-foreground text-lg">1,520</p>
+                            <p class="text-sm text-green-600">+80 today</p>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+                
+                <div class="p-6 bg-muted/30 text-center">
+                    <button class="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-lg font-semibold transition-colors">
+                        <i class="fas fa-refresh mr-2"></i>Load More Heroes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: Leaderboard -->
+
+    <!-- Tab Navigation Script -->
+    <script>
+        (function() {
+            // Tab switching functionality
+            const tabButtons = document.querySelectorAll('.tab-btn, [data-tab-target]');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            function showTab(targetTab) {
+                // Hide all tab contents
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Show target tab content
+                const targetContent = document.getElementById(targetTab);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+                
+                // Update tab button states
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('text-foreground');
+                    btn.classList.add('text-muted-foreground');
+                });
+                
+                // Highlight active tab button
+                const activeBtn = document.querySelector(`[data-tab="${targetTab}"]`);
+                if (activeBtn) {
+                    activeBtn.classList.remove('text-muted-foreground');
+                    activeBtn.classList.add('text-foreground');
+                }
+            }
+            
+            // Add click listeners to tab buttons
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.getAttribute('data-tab') || button.getAttribute('data-tab-target');
+                    if (targetTab) {
+                        showTab(targetTab);
+                    }
+                });
+            });
+            
+            // Game button interactions (placeholder functionality)
+            const gameButtons = document.querySelectorAll('[data-event^="click:start"]');
+            gameButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const gameType = button.getAttribute('data-event').replace('click:start', '').replace('Game', '');
+                    
+                    // Simulate game start
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading Game...';
+                    button.disabled = true;
+                    
+                    // TODO: Initialize Phaser.js game instance
+                    setTimeout(() => {
+                        button.innerHTML = '<i class="fas fa-play mr-2"></i>Start Challenge';
+                        button.disabled = false;
+                        // TODO: Implement actual game logic
+                        console.log(`Starting ${gameType} game...`);
+                    }, 2000);
+                });
+            });
+            
+            // Export functionality placeholder
+            const exportButton = document.querySelector('[data-event="click:exportClassData"]');
+            if (exportButton) {
+                exportButton.addEventListener('click', () => {
+                    // TODO: Implement CSV export functionality
+                    exportButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Exporting...';
+                    setTimeout(() => {
+                        exportButton.innerHTML = '<i class="fas fa-download mr-2"></i>Export CSV';
+                        console.log('CSV export completed');
+                    }, 1500);
+                });
+            }
+            
+        })();
+    </script>
+</body>
+</html>
